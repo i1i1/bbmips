@@ -19,12 +19,12 @@ instr.o: instr.c instr.h
 	$(CC) $(CFLAGS) -c instr.c
 
 vector/vector.o:
-	cd vector
-	make
+	cd vector && make
 
 test: all
 	./$(OUT) ../test/square.s
 
 clean:
 	$(RM) *.o $(OUT)
+	cd vector && make clean
 

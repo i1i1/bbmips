@@ -1,6 +1,7 @@
 * Intro
 I wanted to make a simple processor in verilog and build some environment around it.
 It is very much similar to MIPS, but lacks many of its features(that's why it is called "BBMIPS"). Here is ISA of it.
+* ISA
 ** Register naming
 
 64 registers total
@@ -32,8 +33,7 @@ It is very much similar to MIPS, but lacks many of its features(that's why it is
 
 | op (4) | r0 (6) | r1 (6) | n(16) |
 
-
-* Instructions
+** Instructions
 |--------------------+------+----+------+---------------------------------|
 | instruction        | type | op | func | Description                     |
 |--------------------+------+----+------+---------------------------------|
@@ -67,7 +67,7 @@ It is very much similar to MIPS, but lacks many of its features(that's why it is
 | syscall n, r0, r1  | imm  | 11 |    - | syscall n, r0 is arg, r1 is res |
 |--------------------+------+----+------+---------------------------------|
 
-* Syscalls
+** Syscalls
 |---------+------------------------------------|
 | syscall | Description                        |
 |---------+------------------------------------|
@@ -76,3 +76,16 @@ It is very much similar to MIPS, but lacks many of its features(that's why it is
 |       2 | write integer r0                   |
 |       3 | write ascii character from r0[7:0] |
 |---------+------------------------------------|
+* Other environment and project
+Here you can find some tools for BBMIPS.
+
+- Assembler in /bbas/ directory
+- Disassembler in /disas/ directory
+- Processor implementation in verilog in /proc/ directory
+- Some test programs in /test/ directory
+
+Just run and test it.
+
+#+BEGIN_SRC SH
+  $ ./runprog.sh test/$(ls test/ | shuf | head -1)
+#+END_SRC
