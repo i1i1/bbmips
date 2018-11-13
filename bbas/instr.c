@@ -121,6 +121,13 @@ op_addiu(char *src, int len,
 	return 4;
 }
 
+#define OP(x) do { \
+	int d; \
+	d = x; \
+	len -= d; \
+	src += d; \
+} while (0)
+
 int
 op_la(char *src, int len,
         unsigned r0, unsigned r1, unsigned r2, uint16_t n,
@@ -140,14 +147,10 @@ op_la(char *src, int len,
 	 * addi $r0,	$zero,	addr % (1 << 16)
 	 */
 
-	len -= op_addiu(src, len, r0, ZERO, 0, addr >> 16, 0);
-	src += 4;
-	len -= op_addi(src, len, AT, ZERO, 0, 16, 0);
-	src += 4;
-	len -= op_sll(src, len, r0, r0, AT, 0, 0);
-	src += 4;
-	len -= op_addiu(src, len, r0, ZERO, 0,addr % (1 << 16), 0);
-	src += 4;
+	OP(op_addiu(src, len, r0, ZERO, 0, addr >> 16, 0));
+	OP(op_addi(src, len, AT, ZERO, 0, 16, 0));
+	OP(op_sll(src, len, r0, r0, AT, 0, 0));
+	OP(op_addiu(src, len, r0, ZERO, 0,addr % (1 << 16), 0));
 
 	return 16;
 }
@@ -171,14 +174,10 @@ op_jal(char *src, int len,
 	 * jie	$zero,	$zero,	$at
 	 */
 
-	len -= op_la(src, len, r0, 0, 0, 0, addr);
-	src += 16;
-	len -= op_add(src, len, AT, r0, ZERO, 0, 0);
-	src += 4;
-	len -= op_addi(src, len, r0, PC, 0, 4, 0);
-	src += 4;
-	len -= op_jie(src, len, ZERO, ZERO, AT, 0, 0);
-	src += 4;
+	OP(op_la(src, len, r0, 0, 0, 0, addr));
+	OP(op_add(src, len, AT, r0, ZERO, 0, 0));
+	OP(op_addi(src, len, r0, PC, 0, 4, 0));
+	OP(op_jie(src, len, ZERO, ZERO, AT, 0, 0));
 
 	return 28;
 }

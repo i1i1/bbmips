@@ -41,3 +41,4 @@ struct opcode {
 extern struct opcode ops[];
 
 #endif /* _INSTR_H_ */
+

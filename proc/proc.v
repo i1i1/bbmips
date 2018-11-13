@@ -249,28 +249,23 @@ module dec(in, ir, op, r0, r1, r2, imm, func, dec_out);
 		r0_ = ir[27:22];
 		r1_ = ir[21:16];
 
-		case (op)
-			`OP_RTYPE: begin
-				r2_ = ir[15:10];
-				func_ = ir[9:0];
-			end
-			`OP_ADDIU: begin
-				imm_ = zext16(ir[15:0]);
-				func_ = `FUNC_ADDI;
-			end
-			`OP_LBU: begin
-				imm_ = zext16(ir[15:0]);
-				func_ = `FUNC_ADDI;
-			end
-			`OP_LHU: begin
-				imm_ = zext16(ir[15:0]);
-				func_ = `FUNC_ADDI;
-			end
-			default: begin
-				imm_ = sext16(ir[15:0]);
-				func_ = `FUNC_ADDI;
-			end
-		endcase
+		if (op == `OP_RTYPE) begin
+			r2_ = ir[15:10];
+			func_ = ir[9:0];
+		end else if (op == `OP_ADDI	||
+						op == `OP_LB	||
+						op == `OP_LBU	||
+						op == `OP_LH	||
+						op == `OP_LW	||
+						op == `OP_STB	||
+						op == `OP_STH	||
+						op == `OP_STW) begin
+			imm_ = sext16(ir[15:0]);
+			func_ = `FUNC_ADDI;
+		end else begin
+			imm_ = zext16(ir[15:0]);
+			func_ = `FUNC_ADDI;
+		end
 
 		out = in;
 	end
@@ -328,17 +323,17 @@ module load(in, op, r0, r1_in, r1_out, imm_in, imm_out, func_in, func_out, load_
 				imm = readw(regf.r[r1_in] + imm_in);
 				r1 = `ZERO;
 			end
+			`OP_RTYPE: begin
+				func = func_in;
+				imm = imm_in;
+				r1 = r1_in;
+			end
 			`OP_ADDI: begin
 				func = func_in;
 				imm = imm_in;
 				r1 = r1_in;
 			end
 			`OP_ADDIU: begin
-				func = func_in;
-				imm = imm_in;
-				r1 = r1_in;
-			end
-			`OP_RTYPE: begin
 				func = func_in;
 				imm = imm_in;
 				r1 = r1_in;

@@ -6,21 +6,21 @@
 #define OPCODE_REG(func, s) \
 case (func): \
 	r2 = (n >> 10) & 63;   \
-	fprintf(ofp, "%08x:%08x:\t%s\t%s,\t%s,\t%s\n", n, i, (s), reg[r0], \
+	fprintf(ofp, "%08x:\t%s\t%s,\t%s,\t%s\n", i, (s), reg[r0], \
 			reg[r1], reg[r2]); \
 	break;
 
 #define OPCODE_IMM(op, s) \
 case (op): \
 	tmp = n % (1 << 16); \
-	fprintf(ofp, "%08x:%08x:\t%s\t%s,\t%s,\t%d\n", n, i, (s), reg[r0], \
+	fprintf(ofp, "%08x:\t%s\t%s,\t%s,\t%d\n", i, (s), reg[r0], \
 			reg[r1], tmp); \
 	break;
 
 #define OPCODE_IMM_MEM(op, s) \
 case (op): \
 	tmp = n % (1 << 16); \
-	fprintf(ofp, "%08x:%08x:\t%s\t%s,\t%d(%s)\n", n, i, (s), reg[r0], \
+	fprintf(ofp, "%08x:\t%s\t%s,\t%d(%s)\n", i, (s), reg[r0], \
 			(int)tmp, reg[r1]); \
 	break;
 
@@ -171,8 +171,8 @@ main(int argc, char **argv)
 		OPCODE_IMM(1, "addi")
 		case 2:
 			tmp = n % (1 << 16);
-			fprintf(ofp, "%08x:%08x:\t%s\t%s,\t%s,\t%d\n",
-				i, n, "addiu", reg[r0], reg[r1], tmp);
+			fprintf(ofp, "%08x:\t%s\t%s,\t%s,\t%d\n",
+				i, "addiu", reg[r0], reg[r1], tmp);
 			break;
 		OPCODE_IMM_MEM( 3, "lb")
 		OPCODE_IMM_MEM( 4, "lbu")
@@ -185,7 +185,7 @@ main(int argc, char **argv)
 
 		case 11:
 			tmp = n % (1 << 16);
-			fprintf(ofp, "%08x:%08x:\t%s\t%d,\t%s,\t%s\n", i, n, "syscall",
+			fprintf(ofp, "%08x:\t%s\t%d,\t%s,\t%s\n", i, "syscall",
 					(int)tmp, reg[r0], reg[r1]);
 			break;
 		case 15:
