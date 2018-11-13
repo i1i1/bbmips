@@ -1,0 +1,79 @@
+* Intro
+I wanted to make a simple processor in verilog and build some environment around it.
+It is very much similar to MIPS, but lacks many of its features(that's why it is called "BBMIPS"). Here is ISA of it.
+** Register naming
+
+64 registers total
+
+/zero/ - Register that always contains 0 [0]
+
+/at/ - Assembler temporary register, avoid using! [1]
+
+/v0-v3/ - Return value registers [2, 5]
+
+/a0-a7/ - Argument registers [6, 13]
+
+/t0-t23/ - Temporary registers [14, 37]
+
+/s0-s22/ - Saved registers [38, 61]
+
+/ra/ - Return address register [61]
+
+/sp/ - Stack pointer [62]
+
+/pc/ - program counter [63]
+
+** Instruction types
+*** Register type
++--------+--------+--------+--------+----------+
+| op (4) | r0 (6) | r1 (6) | r2 (6) | func (10)|
++--------+--------+--------+--------+----------+
+
+*** Immediate
++--------+--------+--------+-------+
+| op (4) | r0 (6) | r1 (6) | n(16) |
++--------+--------+--------+-------+
+
+* Instructions
+|--------------------+------+----+------+---------------------------------|
+| instruction        | type | op | func | Description                     |
+|--------------------+------+----+------+---------------------------------|
+| jie     r0, r1, r2 | reg  |  0 |    0 | Jumps to r0 if r1 == r2         |
+| jil     r0, r1, r2 | reg  |  0 |    1 | Jumps to r0 if r1 < r2          |
+| jier    r0, r1, r2 | reg  |  0 |    2 | Jumps to PC+r0 if r1 == r2      |
+| jilr    r0, r1, r2 | reg  |  0 |    3 | Jumps to PC+r0 if r1 < r2       |
+| or      r0, r1, r2 | reg  |  0 |    4 | r0 = r1 \vert r2                |
+| and     r0, r1, r2 | reg  |  0 |    5 | r0 = r1 & r2                    |
+| xor     r0, r1, r2 | reg  |  0 |    6 | r0 = r1 ^ r2                    |
+| nor     r0, r1, r2 | reg  |  0 |    7 | r0 = ~(r1 \vert r2)             |
+| sub     r0, r1, r2 | reg  |  0 |    8 | r0 = r1 - r2                    |
+| add     r0, r1, r2 | reg  |  0 |    9 | r0 = r1 + r2                    |
+| mul     r0, r1, r2 | reg  |  0 |   10 | r0 = r1 * r2                    |
+| div     r0, r1, r2 | reg  |  0 |   11 | r0 = r1 / r2                    |
+| mod     r0, r1, r2 | reg  |  0 |   12 | r0 = r1 % r2                    |
+| sll     r0, r1, r2 | reg  |  0 |   13 | r0 = r1 <<  r2                  |
+| sla     r0, r1, r2 | reg  |  0 |   14 | r0 = r1 <<< r2                  |
+| srl     r0, r1, r2 | reg  |  0 |   15 | r0 = r1 >>  r2                  |
+| sra     r0, r1, r2 | reg  |  0 |   16 | r0 = r1 >>> r2                  |
+| addi    r0, r1, n  | imm  |  1 |    - | r0 = r1 + n                     |
+| addiu   r0, r1, n  | imm  |  2 |    - | r0 = r1 + n                     |
+| lb      r0, n(r1)  | imm  |  3 |    - | load   byte to r0 from r1 + n   |
+| lbu     r0, n(r1)  | imm  |  4 |    - | load  ubyte to r0 from r1 + n   |
+| lh      r0, n(r1)  | imm  |  5 |    - | load   half to r0 from r1 + n   |
+| lhu     r0, n(r1)  | imm  |  6 |    - | load  uhalf to r0 from r1 + n   |
+| lw      r0, n(r1)  | imm  |  7 |    - | load   word to r0 from r1 + n   |
+| stb     r0, n(r1)  | imm  |  8 |    - | store  byte from r0 at r1 + n   |
+| sth     r0, n(r1)  | imm  |  9 |    - | store  half from r0 at r1 + n   |
+| stw     r0, n(r1)  | imm  | 10 |    - | store  word from r0 at r1 + n   |
+| syscall n, r0, r1  | imm  | 11 |    - | syscall n, r0 is arg, r1 is res |
+|--------------------+------+----+------+---------------------------------|
+
+* Syscalls
+|---------+------------------------------------|
+| syscall | Description                        |
+|---------+------------------------------------|
+|       0 | exit with r0 as exit code          |
+|       1 | read integer into r0               |
+|       2 | write integer r0                   |
+|       3 | write ascii character from r0[7:0] |
+|---------+------------------------------------|
