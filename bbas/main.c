@@ -468,7 +468,7 @@ skip_args(FILE *fp, enum format fmt)
 {
 	const char *s;
 
-#define PARSE_REG()		\
+#define SKIP_REG()		\
 do { \
 	unsigned r0; \
 	s = parse_word(fp); \
@@ -478,7 +478,7 @@ do { \
 		error("Unknown register \"%s\"", s); \
 } while (0)
 
-#define PARSE_INT()		\
+#define SKIP_INT()		\
 do { \
 	int64_t _num; \
 	s = parse_word(fp); \
@@ -488,7 +488,7 @@ do { \
 		error("Unknown register \"%s\"", s); \
 } while (0)
 
-#define PARSE_LABEL() \
+#define SKIP_LABEL() \
 do { \
 	s = parse_word(fp); \
 	if (!s) \
@@ -497,46 +497,46 @@ do { \
 
 	switch (fmt) {
 	case FMT_R_R_R:
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ',');
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ',');
-		PARSE_REG();
+		SKIP_REG();
 		break;
 	case FMT_R_R_N:
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ',');
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ',');
-		PARSE_INT();
+		SKIP_INT();
 		break;
 	case FMT_R_N_R:
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ',');
-		PARSE_INT();
+		SKIP_INT();
 		scanc(fp, '(');
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ')');
 		break;
 	case FMT_N_R_R:
-		PARSE_INT();
+		SKIP_INT();
 		scanc(fp, ',');
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ',');
-		PARSE_REG();
+		SKIP_REG();
 		break;
 	case FMT_R_L:
-		PARSE_REG();
+		SKIP_REG();
 		scanc(fp, ',');
-		PARSE_LABEL();
+		SKIP_LABEL();
 		break;
 	default:
 		error("Unknown format for command");
 	}
 
-#undef PARSE_REG
-#undef PARSE_INT
-#undef PARSE_LABEL
+#undef SKIP_REG
+#undef SKIP_INT
+#undef SKIP_LABEL
 
 	return 0;
 }
