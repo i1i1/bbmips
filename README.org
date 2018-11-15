@@ -6,7 +6,7 @@ It is very much similar to MIPS, but lacks many of its features(that's why it is
 
 64 registers total
 
-/zero/ - Register that always contains 0 [0]
+/zero/ - Register that always contains 0 (Read only!) [0]
 
 /at/ - Assembler temporary register, avoid using! [1]
 
@@ -22,7 +22,7 @@ It is very much similar to MIPS, but lacks many of its features(that's why it is
 
 /sp/ - Stack pointer [62]
 
-/pc/ - program counter [63]
+/pc/ - program counter (Read only!) [63]
 
 ** Instruction types
 *** Register type

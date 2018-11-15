@@ -12,16 +12,16 @@ case (func): \
 
 #define OPCODE_IMM(op, s) \
 case (op): \
-	tmp = n % (1 << 16); \
+	tmp = (int16_t)(n % (1 << 16)); \
 	fprintf(ofp, "%08x:\t%s\t%s,\t%s,\t%d\n", i, (s), reg[r0], \
 			reg[r1], tmp); \
 	break;
 
 #define OPCODE_IMM_MEM(op, s) \
 case (op): \
-	tmp = n % (1 << 16); \
+	tmp = (int16_t)(n % (1 << 16)); \
 	fprintf(ofp, "%08x:\t%s\t%s,\t%d(%s)\n", i, (s), reg[r0], \
-			(int)tmp, reg[r1]); \
+			tmp, reg[r1]); \
 	break;
 
 

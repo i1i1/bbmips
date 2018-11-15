@@ -15,7 +15,7 @@ loop:
 	mul	$s2,	$s2,	$s1   # s2 = s2 * s1
 	addi	$s1,	$s1,	-1    # s1 = s1 - 1
 
-	jil	$s3,	$s1,	$s4   # if (s3 < s1) goto loop
+	jil	$s4,	$s3,	$s1   # if (s3 < s1) goto loop
 
 	la	$s4,	hello
 	stw	$s2,	0($s4)
@@ -27,21 +27,19 @@ syscalls:
 	la	$a0,	suf
 	jal	$ra,	puts
 
-	syscall	0,	$zero,	$zero # exit(0)
+	la	$s0,	end
+end:
+	jie	$s0,	$zero,	$zero
+#	syscall	0,	$zero,	$zero # exit(0)
 
 
 puts:
 	la	$t1,	puts_loop
-	la	$t2,	puts_ret
 
 puts_loop:
 	lb	$t0,	0($a0)
-	jie	$t0,	$zero,	$t2
+	jie	$ra,	$t0,	$zero
 	syscall	3,	$t0,	$zero
 	addi	$a0,	$a0,	1
-	jie	$zero,	$zero,	$t1
-
-puts_ret:
-	jie	$zero,	$zero,	$ra
-
+	jie	$t1,	$zero,	$zero
 

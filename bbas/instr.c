@@ -171,13 +171,13 @@ op_jal(char *src, int len,
 	 * la	$r0,	addr
 	 * add	$at,	$r0,	$zer0
 	 * addi $r0,	$pc,	4
-	 * jie	$zero,	$zero,	$at
+	 * jie	$at,	$zero,	$zero
 	 */
 
 	OP(op_la(src, len, r0, 0, 0, 0, addr));
 	OP(op_add(src, len, AT, r0, ZERO, 0, 0));
 	OP(op_addi(src, len, r0, PC, 0, 4, 0));
-	OP(op_jie(src, len, ZERO, ZERO, AT, 0, 0));
+	OP(op_jie(src, len, AT, ZERO, ZERO, 0, 0));
 
 	return 28;
 }
