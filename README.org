@@ -87,5 +87,6 @@ Here you can find some tools for BBMIPS.
 Just run and test it.
 
 #+BEGIN_SRC SH
-  $ ./runprog.sh test/$(ls test/ | shuf | head -1)
+  $ make test
 #+END_SRC
+

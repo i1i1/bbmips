@@ -1,6 +1,6 @@
 BIN=./bin
 
-all: $(BIN) $(BIN)/disas $(BIN)/bbas $(BIN)/tohex $(BIN)/tobin
+all: $(BIN) $(BIN)/disas $(BIN)/bbas $(BIN)/tohex $(BIN)/tobin $(BIN)/proc
 
 $(BIN):
 	mkdir -p $(BIN)
@@ -16,6 +16,15 @@ $(BIN)/tohex:
 
 $(BIN)/tobin:
 	cd tobin && $(MAKE) && cp tobin ../$(BIN)/
+
+$(BIN)/proc:
+	cd proc && $(MAKE) && cp proc ../$(BIN)/
+
+test: all
+	./bin/bbas ./test/$(shell ls test/ | shuf | head -1)
+	./bin/tohex v.out > v1.out
+	mv v1.out v.out
+	./bin/proc
 
 clean:
 	rm -rf $(BIN)/*
