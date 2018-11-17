@@ -1,3 +1,6 @@
+`include "defs.v"
+
+
 module regf(i_clk, i_raddr0, i_raddr1, i_raddr2, i_waddr,
 						i_wdata, i_we, i_pc, o_rdata0, o_rdata1, o_rdata2);
 	input	[31:0]	i_wdata, i_pc;
