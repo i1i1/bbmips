@@ -5,4 +5,3 @@ module adder(i_op1, i_op2, o_res);
 	assign o_res = i_op1 + i_op2;
 
 endmodule
-

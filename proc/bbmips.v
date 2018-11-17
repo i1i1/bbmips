@@ -1,6 +1,8 @@
-module bbmips(i_clk, i_rst);
+module bbmips(i_clk, i_rst, o_ctl, o_disp);
 
 	input			i_clk, i_rst;
+
+	output	[7:0]	o_ctl, o_disp;
 
 	wire	[31:0]	pc, pc_rel, pc_inc_res, instr, memtoreg_mux_out;
 	wire	[31:0]	sext_out, jmp_mux_out, next_pc_mux_out, ram_out, alu_res;
@@ -11,7 +13,7 @@ module bbmips(i_clk, i_rst);
 	wire	[5:0]	r0, r1, r2;
 	wire	[3:0]	op, alu_ctl;
 
-	wire	[1:0]	in_size, out_size;
+	wire	[2:0]	in_size, out_size;
 
 	wire			regwrite, jmp, jmp_rel, memtoreg, alusrc, extop, in_sign;
 
@@ -59,7 +61,7 @@ module bbmips(i_clk, i_rst);
 						.o_regwrite(regwrite),
 						.o_extop(extop));
 	
-	wire sign = extop ? imm[15] : 0;
+	wire sign = extop ? imm[15] : 1'd0;
 
 	sext		sext(.i_data(imm),
 					 .i_sign(sign),
@@ -91,7 +93,9 @@ module bbmips(i_clk, i_rst);
 						.i_op(op),
 						.i_num(alu_src_mux_out),
 						.i_op1(bus_a),
-						.i_op2(bus_b));
+						.i_op2(bus_b),
+						.o_ctl(o_ctl),
+						.o_disp(o_disp));
 
 	mux2		memtoreg_mux(.i_data0(alu_res),
 							 .i_data1(ram_out),
@@ -109,13 +113,10 @@ module bbmips(i_clk, i_rst);
 
 	mux2		next_pc_mux(.i_data0(pc_inc_res),
 							.i_data1(jmp_mux_out),
-							.i_ctl((alu_res == 32'b1) &
-									(jmp | jmp_rel) & (bus_a != 32'b0)),
+							.i_ctl((jmp | jmp_rel) &
+									(alu_res == 32'b1)),
 							.o_data(next_pc_mux_out));
 
-
-//	initial
-//		$monitor("pc = %x ir = %x ram = %x alu = %0d", pc, instr, ram_out, alu_res);
 
 endmodule
 

@@ -54,4 +54,3 @@
 `define REG_PC			6'd63
 
 `endif /* _DEFS_V_ */
-
