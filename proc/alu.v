@@ -6,30 +6,27 @@ module alu(i_op1, i_op2, i_ctl, o_res);
 
 	output	[31:0]	o_res;
 
-	reg		[31:0]	res;
+	wire	[31:0]	res [0:15];
 
 
-	assign o_res = res;
+	assign o_res = res[i_ctl];
 
-	always @ (*) begin
-		case (i_ctl)
-			`ALU_OR:		res <= i_op1 | i_op2;
-			`ALU_AND:		res <= i_op1 & i_op2;
-			`ALU_XOR:		res <= i_op1 ^ i_op2;
-			`ALU_NOR:		res <= ~(i_op1 | i_op2);
-			`ALU_SUB:		res <= i_op1 - i_op2;
-			`ALU_ADD:		res <= i_op1 + i_op2;
-			`ALU_MUL:		res <= i_op1 * i_op2;
-			`ALU_DIV:		res <= i_op1 / i_op2;
-			`ALU_MOD:		res <= i_op1 % i_op2;
-			`ALU_SLL:		res <= i_op1 << i_op2;
-			`ALU_SLA:		res <= i_op1 <<< i_op2;
-			`ALU_SRL:		res <= i_op1 >> i_op2;
-			`ALU_SRA:		res <= i_op1 >>> i_op2;
-			`ALU_SIE:		res <= i_op1 == i_op2;
-			`ALU_SIL:		res <= i_op1 < i_op2;
-		endcase
-	end
+	assign res[`ALU_OR ] = i_op1 | i_op2;
+	assign res[`ALU_AND] = i_op1 & i_op2;
+	assign res[`ALU_XOR] = i_op1 ^ i_op2;
+	assign res[`ALU_NOR] = ~(i_op1 | i_op2);
+	assign res[`ALU_SUB] = i_op1 - i_op2;
+	assign res[`ALU_ADD] = i_op1 + i_op2;
+	assign res[`ALU_MUL] = i_op1 * i_op2;
+	assign res[`ALU_DIV] = i_op1 / i_op2;
+	assign res[`ALU_MOD] = i_op1 % i_op2;
+	assign res[`ALU_SLL] = i_op1 << i_op2;
+	assign res[`ALU_SLA] = i_op1 <<< i_op2;
+	assign res[`ALU_SRL] = i_op1 >> i_op2;
+	assign res[`ALU_SRA] = i_op1 >>> i_op2;
+	assign res[`ALU_SIE] = (i_op1 == i_op2 ? 32'b1 : 32'b0);
+	assign res[`ALU_SIL] = (i_op1 < i_op2 ? 32'b1 : 32'b0);
+
+	assign res[4'hF] = 0;
 
 endmodule
-

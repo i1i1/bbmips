@@ -53,4 +53,3 @@ module regf(i_clk, i_raddr0, i_raddr1, i_raddr2, i_waddr,
 	end
 
 endmodule
-

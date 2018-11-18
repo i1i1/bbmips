@@ -5,9 +5,8 @@ module sext(i_data, i_sign, o_data);
 
 	wire			tmp;
 
-	assign tmp = (i_sign ? i_data[15] : 0);
+	assign tmp = (i_sign ? i_data[15] : 1'd0);
 
 	assign o_data = { { 16 { tmp } }, i_data };
 
 endmodule
-

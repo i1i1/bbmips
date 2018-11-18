@@ -19,7 +19,5 @@ module bbmips_test;
         forever #(period/2) i_clk = ~i_clk;
     end
 
-//    initial #20000 $finish;
-
 endmodule
 

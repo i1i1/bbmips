@@ -35,4 +35,6 @@ clean:
 	cd tohex && $(MAKE) clean
 	cd ..
 	cd tobin && $(MAKE) clean
+	cd ..
+	cd proc && $(MAKE) clean
 

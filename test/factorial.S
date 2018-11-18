@@ -29,8 +29,8 @@ syscalls:
 
 	la	$s0,	end
 end:
-	jie	$s0,	$zero,	$zero
-#	syscall	0,	$zero,	$zero # exit(0)
+#	jie	$s0,	$zero,	$zero
+	syscall	0,	$zero,	$zero # exit(0)
 
 
 puts:
