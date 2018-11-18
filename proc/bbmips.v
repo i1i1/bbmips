@@ -119,7 +119,7 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 
 	mux2		next_pc_mux(.i_data0(pc_inc_res),
 							.i_data1(jmp_mux_out),
-							.i_ctl((jmp | jmp_rel) & alu_res[0] & (instr != 32'b0)),
+							.i_ctl((jmp | jmp_rel) & alu_res[0]),
 							.o_data(next_pc_mux_out));
 
 

@@ -81,11 +81,6 @@ Here you can find some tools for BBMIPS.
 
 - Assembler in /bbas/ directory
 - Disassembler in /disas/ directory
-- Processor implementation in verilog in /proc/ directory
+- Processor implementation in verilog in /proc/ directory (Not ready yet)
 - Some test programs in /test/ directory
 
-Just run and test it.
-
-#+BEGIN_SRC SH
-  $ ./runprog.sh test/$(ls test/ | shuf | head -1)
-#+END_SRC

@@ -17,8 +17,6 @@ module ram(i_clk, i_addr, i_insize, i_insign, i_outsize, i_data, o_data);
 											  mem[i_addr+2], mem[i_addr+3] }) :
 						((i_insize == 3'd2) ? { { 16 { sign } }, mem[i_addr], mem[i_addr+1] } :
 							((i_insize == 3'd1) ? { { 24 { sign } }, mem[i_addr] } : 32'd0)));
-//											({ mem[i_addr], mem[i_addr+1],
-//											  mem[i_addr+2], mem[i_addr+3] }) : 32'd0)));
 
 	initial
 			$readmemb("b.out", mem);
@@ -32,7 +30,7 @@ module ram(i_clk, i_addr, i_insize, i_insign, i_outsize, i_data, o_data);
 		else if (i_outsize == 3'd2)
 				{ mem[i_addr], mem[i_addr+1] } <= i_data[15:0];
 		else if (i_outsize == 3'd1)
-				{ mem[i_addr] } <= i_data[7:0];
+				mem[i_addr] <= i_data[7:0];
 	end
 
 endmodule
