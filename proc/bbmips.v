@@ -15,7 +15,8 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 
 	wire	[2:0]	in_size, out_size;
 
-	wire			regwrite, jmp, jmp_rel, memtoreg, alusrc, extop, in_sign;
+	wire			regwrite, jmp, jmp_rel, syscall, memtoreg,
+							alusrc, extop, in_sign, run, next_run, nclk;
 
 	assign op   = instr[31:28];
 	assign r0   = instr[27:22];
@@ -24,10 +25,14 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 	assign func = instr[ 9: 0];
 	assign imm  = instr[15: 0];
 
+	assign nclk = i_clk & run;
+
 
 	pc			pc_(.i_clk(i_clk),
 				    .i_rst(i_rst),
+					.i_run(next_run),
 				    .i_pc(next_pc_mux_out),
+					.o_run(run),
 				    .o_pc(pc));
 
 	adder		pc_inc(.i_op1(pc),
@@ -37,7 +42,7 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 	rom			rom(.i_addr(pc),
 				    .o_data(instr));
 
-	regf		regf(.i_clk(i_clk),
+	regf		regf(.i_clk(nclk),
 					 .i_raddr0(r0),
 					 .i_raddr1(r1),
 					 .i_raddr2(r2),
@@ -54,17 +59,16 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 						.o_jmp(jmp),
 						.o_jmprel(jmp_rel),
 						.o_memtoreg(memtoreg),
+						.o_syscall(syscall),
 						.o_insize(in_size),
 						.o_insign(in_sign),
 						.o_outsize(out_size),
 						.o_alusrc(alusrc),
 						.o_regwrite(regwrite),
 						.o_extop(extop));
-	
-	wire sign = extop ? imm[15] : 1'd0;
 
 	sext		sext(.i_data(imm),
-					 .i_sign(sign),
+					 .i_sign(extop),
 					 .o_data(sext_out));
 
 	mux2		alu_src_mux(.i_data0(bus_c),
@@ -81,7 +85,7 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 					.i_ctl(alu_ctl),
 					.o_res(alu_res));
 
-	ram			ram(.i_clk(i_clk),
+	ram			ram(.i_clk(nclk),
 					.i_addr(alu_res),
 					.i_insize(in_size),
 					.i_insign(in_sign),
@@ -89,13 +93,15 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 					.i_data(bus_c),
 					.o_data(ram_out));
 
-	syscall		syscall(.i_clk(i_clk),
-						.i_op(op),
-						.i_num(alu_src_mux_out),
-						.i_op1(bus_a),
-						.i_op2(bus_b),
-						.o_ctl(o_ctl),
-						.o_disp(o_disp));
+	syscall		syscall_(.i_clk(nclk),
+						 .i_sys(syscall),
+						 .i_num(alu_src_mux_out),
+						 .i_op1(bus_a),
+						 .i_op2(bus_b),
+						 .i_run(run),
+						 .o_run(next_run),
+						 .o_ctl(o_ctl),
+						 .o_disp(o_disp));
 
 	mux2		memtoreg_mux(.i_data0(alu_res),
 							 .i_data1(ram_out),
@@ -113,10 +119,8 @@ module bbmips(i_clk, i_rst, o_ctl, o_disp);
 
 	mux2		next_pc_mux(.i_data0(pc_inc_res),
 							.i_data1(jmp_mux_out),
-							.i_ctl((jmp | jmp_rel) &
-									(alu_res == 32'b1)),
+							.i_ctl((jmp | jmp_rel) & alu_res[0] & (instr != 32'b0)),
 							.o_data(next_pc_mux_out));
 
 
 endmodule
-

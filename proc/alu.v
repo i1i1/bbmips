@@ -27,4 +27,6 @@ module alu(i_op1, i_op2, i_ctl, o_res);
 	assign res[`ALU_SIE] = (i_op1 == i_op2 ? 32'b1 : 32'b0);
 	assign res[`ALU_SIL] = (i_op1 < i_op2 ? 32'b1 : 32'b0);
 
+	assign res[4'hF] = 0;
+
 endmodule

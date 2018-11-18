@@ -1,14 +1,15 @@
 `include "defs.v"
 
-module control(i_op, i_func, o_jmp, o_jmprel, o_memtoreg, o_insize, o_insign,
-					o_outsize, o_memwrite, o_alusrc, o_regwrite, o_extop);
+module control(i_op, i_func, o_jmp, o_jmprel, o_syscall,
+					o_memtoreg, o_insize, o_insign, o_outsize,
+						o_memwrite, o_alusrc, o_regwrite, o_extop);
 	input	[9:0]	i_func;
 	input	[3:0]	i_op;
 
 
 	output	[2:0]	o_insize, o_outsize;
 	output			o_jmp, o_jmprel, o_memtoreg, o_memwrite, o_insign,
-											o_alusrc, o_regwrite, o_extop;
+									o_syscall, o_alusrc, o_regwrite, o_extop;
 
 	reg				regw;
 
@@ -34,6 +35,7 @@ module control(i_op, i_func, o_jmp, o_jmprel, o_memtoreg, o_insize, o_insign,
 	assign o_outsize = (i_op == `OP_STB) ? 3'd1 :
 							(i_op == `OP_STH) ? 3'd2 :
 								(i_op == `OP_STW) ? 3'd4 : 3'd0;
+	assign o_syscall = (i_op == `OP_SYSCALL);
 
 
 	always @ (*) begin
