@@ -66,8 +66,10 @@ agetc(FILE *fp)
 
 	ret = getc(fp);
 
-	if (ret == '\n')
+	if (ret == '\n') {
 		line++;
+		return ret;
+	}
 
 	if (ret != '#')
 		return ret;
@@ -483,9 +485,9 @@ do { \
 	int64_t _num; \
 	s = parse_word(fp); \
 	if (!s) \
-		error("Expected register found EOF"); \
+		error("Expected number, but found EOF"); \
 	if (parse_int(s, &_num)) \
-		error("Unknown register \"%s\"", s); \
+		error("Expected number, but found  \"%s\"", s); \
 } while (0)
 
 #define SKIP_LABEL() \
@@ -562,9 +564,9 @@ do { \
 	int64_t _num; \
 	s = parse_word(fp); \
 	if (!s) \
-		error("Expected register found EOF"); \
+		error("Expected number, but found EOF"); \
 	if (parse_int(s, &_num)) \
-		error("Unknown register \"%s\"", s); \
+		error("Expected number, but found \"%s\"", s); \
 	(num) = (uint16_t)_num; \
 } while (0)
 
