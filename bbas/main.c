@@ -106,7 +106,7 @@ hash(const char *str)
 }
 
 struct opcode *
-getop(const char *s)
+parse_op(const char *s)
 {
 	int i;
 
@@ -208,8 +208,6 @@ parse_int(const char *str, int64_t *res)
 		n = strlen(s);
 	}
 
-	printf("\t\tsign %d \"%s\"\n", sign, s);
-
 	if (n == 0)
 		return 1;
 
@@ -270,8 +268,6 @@ parse_int(const char *str, int64_t *res)
 	} while (*s);
 
 	*res *= sign;
-
-	printf("\t\tsign %d %d\n", sign, (int)*res);
 
 	return 0;
 }
@@ -446,11 +442,9 @@ vector_get_label(vector *v, const char *s, uint32_t *addr,
 	size_t h;
 
 	h = hash(s);
-	printf("hash is %p\n", (void *)h);
 
 	for (i = 0; i < vector_nmemb(v); i++) {
 		lp = vector_get(v, i);
-		printf("\thash is %p\n", (void *)lp->h);
 		if (lp->h == h) {
 			if (lp->seg == SEG_TEXT)
 				*addr = tbeg + lp->addr;
@@ -663,7 +657,6 @@ getlinks(char *ifs, vector *lnks, uint32_t *tend, uint32_t *dend)
 	for (;;) {
 		s = parse_word(fp);
 		n = (s == NULL) ? 0 : strlen(s);
-		printf("Word \"%s\" at line %d\n", s, line);
 
 		/* If EOF then finish */
 		if (s == NULL)
@@ -681,7 +674,7 @@ getlinks(char *ifs, vector *lnks, uint32_t *tend, uint32_t *dend)
 		}
 
 		/* If found reference */
-		if (s[0] != '.' && s[n - 1] == ':') {
+		if (s[n - 1] == ':' && s[0] != '.') {
 			struct link lnk;
 			*(char *)(s + n - 1) = '\0';
 
@@ -691,10 +684,6 @@ getlinks(char *ifs, vector *lnks, uint32_t *tend, uint32_t *dend)
 			lnk.h = hash(s);
 			lnk.seg = seg;
 			lnk.addr = (seg == SEG_DATA) ? (*dend) : (*tend);
-
-			printf("Found label \"%s\" at seg %s at 0x%x\n",
-					s, seg == SEG_DATA ? ".data" : ".text",
-					seg == SEG_DATA ? (*dend) : (*tend));
 
 			if (vector_push(lnks, &lnk) != VECTOR_OK)
 				error("Memmory error");
@@ -799,7 +788,7 @@ do { \
 		if (seg == SEG_TEXT) {
 			struct opcode *op;
 
-			op = getop(s);
+			op = parse_op(s);
 
 			if (!op)
 				error("Unknown command \"%s\"", s);
@@ -891,7 +880,6 @@ do { \
 				do {
 					PARSE_INT(&num);
 
-					printf("num is %d\n", (int)num);
 					if (-128 > num || num >= 256)
 						error("Too large or too small number %s", s);
 
@@ -1018,7 +1006,7 @@ do { \
 			int len;
 			static char buf[BUFSIZE];
 
-			op = getop(s);
+			op = parse_op(s);
 			len = BUFSIZE;
 
 			if (!op)

@@ -6,7 +6,7 @@ module alu(i_op1, i_op2, i_ctl, o_res);
 
 	output	[31:0]	o_res;
 
-	wire	[31:0]	res [0:15];
+	wire	[31:0]	res [0:14];
 
 
 	assign o_res = res[i_ctl];
@@ -26,7 +26,5 @@ module alu(i_op1, i_op2, i_ctl, o_res);
 	assign res[`ALU_SRA] = i_op1 >>> i_op2;
 	assign res[`ALU_SIE] = (i_op1 == i_op2 ? 32'b1 : 32'b0);
 	assign res[`ALU_SIL] = (i_op1 < i_op2 ? 32'b1 : 32'b0);
-
-	assign res[4'hF] = 0;
 
 endmodule

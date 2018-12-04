@@ -30,9 +30,6 @@ module alu_ctrl(i_op, i_func, o_aluctl);
 					`FUNC_SLA:	aluctl <= `ALU_SLA;
 					`FUNC_SRL:	aluctl <= `ALU_SRL;
 					`FUNC_SRA:	aluctl <= `ALU_SRA;
-
-					default:	/* Nothing! */;
-
 				endcase
 			default:	aluctl <= `ALU_ADD;
 		endcase

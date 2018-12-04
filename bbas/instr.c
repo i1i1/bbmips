@@ -38,7 +38,7 @@ name(char *src, int len, \
 	res |= ((r2) << 10);  \
 	res |= (func);        \
                           \
-    putop(src, res);      \
+	putop(src, res);      \
 	return 4;             \
 }
 
@@ -61,7 +61,7 @@ name(char *src, int len, \
 	res |= ((r1) << 16);  \
 	res |= n;             \
                           \
-    putop(src, res);      \
+	putop(src, res);      \
 	return 4;             \
 }
 
@@ -121,6 +121,10 @@ op_addiu(char *src, int len,
 	return 4;
 }
 
+/*
+ * From here on pseudo instructions go.
+ */
+
 #define OP(x) do { \
 	int d; \
 	d = x; \
@@ -147,10 +151,10 @@ op_la(char *src, int len,
 	 * addi $r0,	$zero,	addr % (1 << 16)
 	 */
 
-	OP(op_addiu(src, len, r0, ZERO, 0, addr >> 16, 0));
-	OP(op_addi(src, len, AT, ZERO, 0, 16, 0));
-	OP(op_sll(src, len, r0, r0, AT, 0, 0));
-	OP(op_addiu(src, len, r0, ZERO, 0,addr % (1 << 16), 0));
+	OP(op_addiu(src, len,	r0,	ZERO,	0,	addr >> 16,	0));
+	OP(op_addi (src, len,	AT,	ZERO,	0,	16,		0));
+	OP(op_sll  (src, len,	r0,	r0,	AT,	0,		0));
+	OP(op_addiu(src, len,	r0,	ZERO,	0,	addr % (1 << 16),0));
 
 	return 16;
 }
@@ -174,10 +178,10 @@ op_jal(char *src, int len,
 	 * jie	$at,	$zero,	$zero
 	 */
 
-	OP(op_la(src, len, r0, 0, 0, 0, addr));
-	OP(op_add(src, len, AT, r0, ZERO, 0, 0));
-	OP(op_addi(src, len, r0, PC, 0, 4, 0));
-	OP(op_jie(src, len, AT, ZERO, ZERO, 0, 0));
+	OP(op_la  (src, len,	r0,	0,	0,	0,	addr));
+	OP(op_add (src, len,	AT,	r0,	ZERO,	0,	0));
+	OP(op_addi(src, len,	r0,	PC,	0,	4,	0));
+	OP(op_jie (src, len,	AT,	ZERO,	ZERO,	0,	0));
 
 	return 28;
 }
