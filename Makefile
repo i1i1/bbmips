@@ -6,19 +6,24 @@ $(BIN):
 	mkdir -p $(BIN)
 
 $(BIN)/disas:
-	cd disas && $(MAKE) && cp disas ../$(BIN)/
+	$(MAKE) -C disas
+	cp disas/disas ./$(BIN)/
 
 $(BIN)/bbas:
-	cd bbas && $(MAKE) && cp bbas ../$(BIN)/
+	$(MAKE) -C bbas
+	cp bbas/bbas ./$(BIN)/
 
 $(BIN)/tohex:
-	cd tohex && $(MAKE) && cp tohex ../$(BIN)/
+	$(MAKE) -C tohex
+	cp tohex/tohex ./$(BIN)/
 
 $(BIN)/tobin:
-	cd tobin && $(MAKE) && cp tobin ../$(BIN)/
+	$(MAKE) -C tobin
+	cp tobin/tobin ./$(BIN)/
 
 $(BIN)/proc:
-	cd proc && $(MAKE) && cp proc ../$(BIN)/
+	$(MAKE) -C proc
+	cp proc/proc ./$(BIN)/
 
 test: all
 	./bin/bbas ./test/$(shell ls test/ | shuf | head -1)

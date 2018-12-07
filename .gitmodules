@@ -1,0 +1,3 @@
+[submodule "dict"]
+	path = dict
+	url = https://github.com/i1i1/dict

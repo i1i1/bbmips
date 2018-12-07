@@ -5,7 +5,7 @@
 #include <time.h>
 #include <ctype.h>
 
-#include "vector/vector.h"
+#include "../dict/dict.h"
 #include "instr.h"
 
 
@@ -34,7 +34,6 @@ enum segment {
 };
 
 struct link {
-	size_t h;
 	enum segment seg;
 	uint32_t addr;
 };
@@ -93,9 +92,8 @@ aputc(int c, FILE *fp)
  * An ordinary djb2 implimentation
  */
 size_t
-hash(const char *str)
+hash(const char *s)
 {
-	char *s = (char *)str;
 	size_t h = 5381;
 	int c;
 
@@ -126,7 +124,7 @@ parse_op(const char *s)
  * ':' character signifies the end of the `word`, but also
  * belongs to the `word`.
  */
-const char *
+char *
 parse_word(FILE *fp)
 {
 	static char buf[BUFSIZE];
@@ -434,32 +432,6 @@ scanc(FILE *fp, char chr)
 }
 
 int
-vector_get_label(vector *v, const char *s, uint32_t *addr,
-							uint32_t tbeg, uint32_t dbeg)
-{
-	const struct link *lp;
-	int i;
-	size_t h;
-
-	h = hash(s);
-
-	for (i = 0; i < vector_nmemb(v); i++) {
-		lp = vector_get(v, i);
-		if (lp->h == h) {
-			if (lp->seg == SEG_TEXT)
-				*addr = tbeg + lp->addr;
-			else if (lp->seg == SEG_DATA)
-				*addr = dbeg + lp->addr;
-			else
-				error("Label in unknown segment");
-
-			return 0;
-		}
-	}
-	return 1;
-}
-
-int
 skip_args(FILE *fp, enum format fmt)
 {
 	const char *s;
@@ -538,11 +510,11 @@ do { \
 }
 
 int
-parse_args(FILE *fp, uint32_t tbeg, uint32_t dbeg, vector *lnks,
+parse_args(FILE *fp, uint32_t tbeg, uint32_t dbeg, dict *lnks,
             enum format fmt, unsigned *r0, unsigned *r1,
             unsigned *r2, uint16_t *n, uint32_t *addr)
 {
-	const char *s;
+	char *s;
 
 #define PARSE_REG(reg)		\
 do { \
@@ -566,11 +538,13 @@ do { \
 
 #define PARSE_LABEL(addr) \
 do { \
+	struct link *lp; \
 	s = parse_word(fp); \
 	if (!s) \
 		error("Expected label found EOF"); \
-	if (vector_get_label(lnks, s, (addr), tbeg, dbeg)) \
+	if (!(lp = dict_get(lnks, s))) \
 			error("No such label \"%s\"", s); \
+	*addr = lp->addr + (lp->seg == SEG_DATA ? dbeg : tbeg); \
 } while (0)
 
 	switch (fmt) {
@@ -620,28 +594,11 @@ do { \
 }
 
 int
-vector_has_str(vector *v, const char *s)
-{
-	const struct link *lp;
-	int i;
-	size_t h;
-
-	h = hash(s);
-
-	for (i = 0; i < vector_nmemb(v); i++) {
-		lp = vector_get(v, i);
-		if (lp->h == h)
-			return 1;
-	}
-	return 0;
-}
-
-int
-getlinks(char *ifs, vector *lnks, uint32_t *tend, uint32_t *dend)
+getlinks(char *ifs, dict *lnks, uint32_t *tend, uint32_t *dend)
 {
 	FILE *fp;
 	int c;
-	const char *s;
+	char *s;
 	int n;
 	enum segment seg;
 
@@ -675,17 +632,20 @@ getlinks(char *ifs, vector *lnks, uint32_t *tend, uint32_t *dend)
 
 		/* If found reference */
 		if (s[n - 1] == ':' && s[0] != '.') {
-			struct link lnk;
-			*(char *)(s + n - 1) = '\0';
+			struct link *lnk;
 
-			if (vector_has_str(lnks, s))
+			s[n - 1] = '\0';
+
+			if (dict_get(lnks, s))
 				error("Already has label \"%s\"", s);
 
-			lnk.h = hash(s);
-			lnk.seg = seg;
-			lnk.addr = (seg == SEG_DATA) ? (*dend) : (*tend);
+			if (!(lnk = malloc(sizeof(*lnk))))
+				error("Memmory error");
 
-			if (vector_push(lnks, &lnk) != VECTOR_OK)
+			lnk->seg = seg;
+			lnk->addr = (seg == SEG_DATA) ? (*dend) : (*tend);
+
+			if (dict_set(lnks, s, lnk))
 				error("Memmory error");
 
 			continue;
@@ -809,12 +769,12 @@ do { \
 }
 
 int
-assemble(char *ifs, FILE *ts, FILE *ds, vector *lnks,
+assemble(char *ifs, FILE *ts, FILE *ds, dict *lnks,
 		uint32_t tbeg, uint32_t dbeg)
 {
 	FILE *fp;
 	int c;
-	const char *s;
+	char *s;
 	int n;
 	enum segment seg;
 
@@ -846,9 +806,9 @@ assemble(char *ifs, FILE *ts, FILE *ds, vector *lnks,
 
 		/* If found reference */
 		if (s[0] != '.' && s[n - 1] == ':') {
-			*(char *)(s + n - 1) = '\0';
+			s[n - 1] = '\0';
 
-			if (!vector_has_str(lnks, s))
+			if (!dict_get(lnks, s))
 				error("No label \"%s\"", s);
 
 			continue;
@@ -1059,8 +1019,7 @@ main(int argc, char **argv)
 {
 	FILE *ts, *ds;
 	char *ifs, *ofs;
-	vector lnks;
-	int ret;
+	dict *lnks;
 	uint32_t tend, dend;
 
 	if (argc < 2)
@@ -1074,22 +1033,22 @@ main(int argc, char **argv)
 	ofs = "v.out";
 	ds = tmpfile();
 	ts = tmpfile();
-	ret = vector_init(&lnks, sizeof(struct link), realloc);
+	lnks = dict_init(1);
 
-	if (!ds || !ts || ret != VECTOR_OK)
+	if (!ds || !ts || !lnks)
 		error("Memmory error");
 
-	if (getlinks(ifs, &lnks, &tend, &dend)) {
-		vector_free(&lnks);
+	if (getlinks(ifs, lnks, &tend, &dend)) {
+		dict_free(lnks);
 		error("Couldn't get links from file \"%s\"", ifs);
 	}
 
-	if (assemble(ifs, ts, ds, &lnks, 0, tend)) {
-		vector_free(&lnks);
+	if (assemble(ifs, ts, ds, lnks, 0, tend)) {
+		dict_free(lnks);
 		error("Couldn't assemble file \"%s\" to \"%s\"", ifs, ofs);
 	}
 
-	vector_free(&lnks);
+	dict_free(lnks);
 
 	rewind(ts);
 	rewind(ds);
